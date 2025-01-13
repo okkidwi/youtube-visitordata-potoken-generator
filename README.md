@@ -1,6 +1,6 @@
 # YouTube VisitorData & PoToken Generator
 
-Forked from [YunzheZJU](https://github.com/YunzheZJU/youtube-po-token-generator)
+Credit to [YunzheZJU](https://github.com/YunzheZJU/youtube-po-token-generator)
 
 ## Introduction
 
