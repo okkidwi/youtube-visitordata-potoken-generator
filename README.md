@@ -4,60 +4,43 @@ Forked from [YunzheZJU](https://github.com/YunzheZJU/youtube-po-token-generator)
 
 ## Introduction
 
-This program outputs the mysterious pair `{ visitorData, poToken }`, with the help of `jsdom`.
+This project generates `{ visitorData, poToken }` pairs, which are used for YouTube's PoToken authentication process. The generation is automated via a GitHub Actions workflow that can be triggered manually or scheduled daily.
 
 ## How it works
 
-Only one network request is made to get a fresh copy of `visitorData`.
+The workflow uses the `youtube-po-token-generator` package to generate fresh `visitorData` and `poToken` pairs. These are logged and saved into a file, which is then uploaded as an artifact for easy access. It generates a valid `poToken` using the `visitorData` fetched from YouTube.
 
-Then `poToken` is generated with pre-downloaded scripts from YouTube and some magic provided in `lib/inject.js`
-
-No real browser is required to install.
-
-## How to use
-
-```bash
-yarn add youtube-po-token-generator
-# Or
-npm install youtube-po-token-generator
-```
-
-See `examples` for simple usages.
-
-```javascript
-const { generate } = require('youtube-po-token-generator')
-
-generate().then(console.log, console.error)
-// => { visitorData: '...', poToken: '...' }
-```
-
-Require `lib/task` directly if you have already prepared your `visitorData`.
-
-```javascript
-const { createTask } = require('youtube-po-token-generator/lib/task')
-
-const visitorData = '...'
-
-createTask(visitorData).then(task => task.start()).then(console.log, console.error)
-// => { poToken: '...' }
-```
+### Workflow Steps:
+1. **Checkout Repository**: The latest code from the repository is pulled.
+2. **Install Dependencies**: The required packages (`youtube-po-token-generator` and `date-fns`) are installed.
+3. **Generate Data**: For each entry, a fresh pair of `visitorData` and `poToken` is generated and timestamped.
+4. **Log & Upload**: The results are logged to `generated_results.log` and uploaded as an artifact.
 
 ## Automation with GitHub Actions
 
-The GitHub Actions workflow automatically handles the generation of multiple entries of visitorData and poToken. The workflow can be manually triggered with a customizable entry count or scheduled to run daily.
+The GitHub Actions workflow automates the entire process of generating visitor data and PoTokens. It provides both **manual and scheduled triggers**:
 
-The results are uploaded as an artifact after each run.
+- **Manual Trigger**: The workflow can be manually executed with a specified number of entries for visitor data and PoTokens. This is useful when you need to generate a specific amount of data on demand.
+  
+- **Scheduled Trigger**: The workflow is set to run automatically on a daily schedule (00:00 UTC). This ensures that fresh visitor data and PoTokens are generated regularly without manual intervention.
 
-## Related works
+The automation involves the following steps:
+1. **Checking out the latest repository code** to ensure the latest changes are applied.
+2. **Installing the required Node.js packages** (`youtube-po-token-generator` and `date-fns`) to handle the generation and timestamping.
+3. **Generating visitor data and PoTokens** by invoking the `youtube-po-token-generator` package, logging the results, and storing them in a file.
+4. **Uploading the results as artifacts**: Once the process completes, the generated results are saved in a log file (`generated_results.log`) and uploaded as a GitHub artifact, making it easy to access and download.
 
-This project is inspired by https://github.com/iv-org/youtube-trusted-session-generator .
+By automating this process, you can ensure that valid PoTokens and visitor data are generated consistently and with minimal manual effort, improving efficiency and reliability.
+
+## Related Works
+
+This project is inspired by [iv-org/youtube-trusted-session-generator](https://github.com/iv-org/youtube-trusted-session-generator).
+
+## Forked from
+
+This repository was forked from [YunzheZJU/youtube-po-token-generator](https://github.com/YunzheZJU/youtube-po-token-generator).
 
 ## More
 
-Debugging the source code from YouTube was a pain.
-
-* Pausing at key parts of the `poToken` generation may lead to misleading branches.
-
-* Modification on the injected code from `botguardData.program` may lead to invalid tokens.
-
-* Improper userAgent would lead to valid or invalid poToken being generated randomly, like a lottery.
+- Debugging the source code from YouTube was challenging due to dynamic changes in the token generation process.
+- Modifying injected code or userAgent values can affect the validity of the generated `poToken`.
