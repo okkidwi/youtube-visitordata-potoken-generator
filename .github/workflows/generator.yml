@@ -1,0 +1,45 @@
+name: Generate Visitor Data & PoToken
+on:
+  workflow_dispatch:
+    inputs:
+      number_of_entries:
+        description: "Amount of Visitor Data & PoToken to generate"
+        required: true
+        default: 1
+  schedule:
+    - cron: "0 0 * * *" # 00:00 UTC
+
+jobs:
+  generate_po_tokens:
+    name: Generate Visitor Data & PoToken
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22.12.0"
+
+      - name: Install Required Packages
+        run: |
+          npm install youtube-po-token-generator
+          npm install date-fns
+
+      - name: Generate Visitor Data and PoToken
+        run: |
+          echo -e '#!/usr/bin/env node\n\nconst { generate } = require("youtube-po-token-generator");\nconst fs = require("fs");\nconst { format } = require("date-fns");\n\n(async () => {\n  let logOutput = "--------------------------------------------------------------\\n";\n  logOutput += "YOUTUBE VISITOR DATA & POTOKEN GENERATOR\\n";\n  logOutput += "--------------------------------------------------------------\\n";\n  logOutput += "CREATED BY Okki Dwi | FORKED FROM YunzheZJU\\n";\n  logOutput += "VISIT: https://github.com/okkidwi/youtube-po-token-generator\\n";\n  logOutput += "--------------------------------------------------------------\\n";\n\n  const entryCount = parseInt(process.env.NUMBER_OF_ENTRIES, 10);\n\n  for (let i = 0; i < entryCount; i++) {\n    try {\n      const timestamp = format(new Date(), "yyyy-MM-dd HH:mm:ss");\n      const visitorData = await generate(); // Get visitorData from generate()\n      const poToken = visitorData.poToken; // Use the same visitorData to get the poToken\n\n      const entryOutput = `\\nEntry ${i + 1}:\\n`;\n      const entryDetails = `Timestamp    : ${timestamp}\\nVisitor Data : ${visitorData.visitorData}\\nPoToken      : ${poToken}\\n`;\n      logOutput += entryOutput + entryDetails + "--------------------------------------------------------------\\n";\n\n    } catch (error) {\n      console.error(`Error generating PoToken for entry ${i + 1}: ${error.message}`);\n    }\n  }\n\n  fs.writeFileSync("generated_results.log", logOutput);\n})();' > ./generate_data.js
+          chmod +x generate_data.js
+          node ./generate_data.js
+          
+          cat generated_results.log
+        env:
+          NUMBER_OF_ENTRIES: ${{ inputs.number_of_entries }}
+
+      - name: Upload Generated Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: visitor-data-po-tokens
+          path: generated_results.log
