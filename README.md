@@ -1,4 +1,6 @@
-# YouTube PoToken Generator
+# YouTube VisitorData & PoToken Generator
+
+Forked from [YunzheZJU](https://github.com/YunzheZJU/youtube-po-token-generator)
 
 ## Introduction
 
@@ -39,6 +41,12 @@ const visitorData = '...'
 createTask(visitorData).then(task => task.start()).then(console.log, console.error)
 // => { poToken: '...' }
 ```
+
+## Automation with GitHub Actions
+
+The GitHub Actions workflow automatically handles the generation of multiple entries of visitorData and poToken. The workflow can be manually triggered with a customizable entry count or scheduled to run daily.
+
+The results are uploaded as an artifact after each run.
 
 ## Related works
 
